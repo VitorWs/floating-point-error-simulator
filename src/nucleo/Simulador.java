@@ -3,13 +3,13 @@ package nucleo;
 import java.util.ArrayList;
 import java.util.List;
 
-/** Fachada do núcleo: é por aqui que a CLI deve chamar o backend. */
+/** Fachada do nucleo: eh por aqui que a CLI deve chamar o backend. */
 public final class Simulador {
 
     private Simulador() {
     }
 
-    /** Executa x (op) y com n dígitos e compara com a referência em double. */
+    /** Executa x (op) y com n digitos e compara com a referencia em double. */
     public static ResultadoOperacao executar(String xTexto, String yTexto, Operacao op,
                                              int n, ModoCorte modo) {
         NumeroPontoFlutuante x = NumeroPontoFlutuante.de(xTexto, n, modo);
@@ -34,7 +34,7 @@ public final class Simulador {
 
     /**
      * Soma 'vezes' vezes o mesmo valor, cortando o acumulado a cada passo.
-     * Retorna um resultado por passo (para tabular o acúmulo de erro).
+     * Retorna um resultado por passo (para tabular o acumulo de erro).
      */
     public static List<ResultadoOperacao> somaSucessiva(String valorTexto, int vezes,
                                                         int n, ModoCorte modo) {
@@ -49,7 +49,7 @@ public final class Simulador {
         List<ResultadoOperacao> passos = new ArrayList<>();
         for (int i = 0; i < vezes; i++) {
             NumeroPontoFlutuante anterior = acumulado;
-            acumulado = acumulado.somar(parcela);   // corte a cada passo intermediário
+            acumulado = acumulado.somar(parcela);   // corte a cada passo intermediario
             exato += valorDouble;
             passos.add(ResultadoOperacao.de(Operacao.SOMA, anterior, parcela, acumulado, exato));
         }

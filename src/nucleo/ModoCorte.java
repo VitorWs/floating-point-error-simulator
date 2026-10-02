@@ -1,6 +1,6 @@
 package nucleo;
 
-/** Estratégia usada para cortar a mantissa em n dígitos significativos. */
+/** Estrategia usada para cortar a mantissa em n digitos significativos. */
 public enum ModoCorte {
     TRUNCAMENTO("Truncamento"),
     ARREDONDAMENTO("Arredondamento simétrico");

@@ -2,7 +2,7 @@ package nucleo;
 
 import java.util.List;
 
-/** Verificação rápida do núcleo com os casos do edital (t = 4). Não é a CLI final. */
+/** Verificacao rapida do nucleo com os casos do edital (t = 4). Nao e a CLI final. */
 public class DemoNucleo {
 
     public static void main(String[] args) {

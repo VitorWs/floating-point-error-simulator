@@ -1,13 +1,13 @@
 package nucleo;
 
 /**
- * Resultado de uma operação simulada, comparado com a referência em double.
+ * Resultado de uma operacao simulada, comparado com a referencia em double.
  *
- * @param x          primeiro operando (já cortado em n dígitos)
- * @param y          segundo operando (já cortado em n dígitos)
- * @param resultado  resultado em precisão finita
- * @param exato      valor de referência calculado em double com as entradas originais
- * @param aproximado resultado em precisão finita convertido para double
+ * @param x          primeiro operando (ja cortado em n digitos)
+ * @param y          segundo operando (ja cortado em n digitos)
+ * @param resultado  resultado em precisao finita
+ * @param exato      valor de referencia calculado em double com as entradas originais
+ * @param aproximado resultado em precisao finita convertido para double
  * @param erroAbsoluto Ea = |exato - aproximado|
  * @param erroRelativo Er = Ea / |exato| (NaN se exato = 0)
  */

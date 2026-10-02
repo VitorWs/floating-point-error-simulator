@@ -1,6 +1,6 @@
 package nucleo;
 
-/** Cálculo dos erros absoluto e relativo. */
+/** Calculo dos erros absoluto e relativo. */
 public final class Erros {
 
     private Erros() {
@@ -13,7 +13,7 @@ public final class Erros {
 
     /**
      * Er = Ea / | Exato |.
-     * Retorna NaN quando o valor exato é zero (erro relativo indefinido).
+     * Retorna NaN quando o valor exato e zero (erro relativo indefinido).
      */
     public static double relativo(double exato, double aproximado) {
         if (exato == 0.0) {
