@@ -12,13 +12,13 @@ public final class Erros {
     }
 
     /**
-     * Er = Ea / | Exato |.
-     * Retorna NaN quando o valor exato e zero (erro relativo indefinido).
+     * Er = Ea / | Aproximado |.
+     * Retorna NaN quando o valor aproximado e zero (erro relativo indefinido).
      */
     public static double relativo(double exato, double aproximado) {
-        if (exato == 0.0) {
+        if (aproximado == 0.0) {
             return Double.NaN;
         }
-        return absoluto(exato, aproximado) / Math.abs(exato);
+        return absoluto(exato, aproximado) / Math.abs(aproximado);
     }
 }
