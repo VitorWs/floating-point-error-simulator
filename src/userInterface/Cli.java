@@ -11,12 +11,15 @@ import nucleo.ModoCorte;
 import nucleo.Operacao;
 import nucleo.ResultadoOperacao;
 import nucleo.Simulador;
+import apresentacao.Formatador;
+import java.util.List;
 /**
  *
  * @author laeds
  */
 public class Cli {
     private static Scanner entrada = new Scanner(System.in);
+    private static final String FORMATO_LINHA = "%-15s | %-17s | %13s | %13s | %13s | %13s";
     
     public static void mostrarMenu(){
         System.out.println("|| Calculadora! ||");
@@ -40,18 +43,29 @@ public class Cli {
         Operacao op = lerOperacao();
         int n = lerInteiro("Digitos significativos (n): ", 1);
 
-        // 2) Executar nos dois modos e mostrar
+        // 2) Calcular nos dois modos e, so se nao houver erro, mostrar a tabela
+        ModoCorte[] modos = ModoCorte.values();
         try {
-            for (ModoCorte modo : ModoCorte.values()) {
-                ResultadoOperacao r = Simulador.executar(x, y, op, n, modo);
-                System.out.println(modo);
-                System.out.println("");
-                System.out.println("Resultado em precisao finita: " + r.resultado());
-                System.out.println("Resultado exato: " + r.exato());
-                System.out.println("Resultado aproximado: " + r.aproximado());
-                System.out.println("Erro absoluto: " + r.erroAbsoluto() + " Erro relativo: " + r.erroRelativo());
-                System.out.println("");
+            ResultadoOperacao[] resultados = new ResultadoOperacao[modos.length];
+            for (int i = 0; i < modos.length; i++) {
+                resultados[i] = Simulador.executar(x, y, op, n, modos[i]);
             }
+
+            System.out.println("");
+            System.out.println(x + " " + op.getSimbolo() + " " + y + "   (n = " + n + ")");
+            imprimirCabecalho("Modo");
+            for (int i = 0; i < modos.length; i++) {
+                imprimirLinha(modos[i].toString(), resultados[i]);
+            }
+
+            // Operandos depois do corte: mostra por que os modos divergem.
+            System.out.println("");
+            System.out.println("Operandos armazenados com " + n + " digitos:");
+            for (int i = 0; i < modos.length; i++) {
+                System.out.println(modos[i] + ": x = " + resultados[i].x()
+                        + " | y = " + resultados[i].y());
+            }
+            System.out.println("");
         } catch (ArithmeticException e) {
             System.out.println(e.getMessage());
         }
@@ -113,6 +127,50 @@ public class Cli {
         }
     }
     
+    private static void imprimirCabecalho(String tituloPrimeiraColuna) {
+            String cabecalho = String.format(FORMATO_LINHA,
+                tituloPrimeiraColuna, "Precisao finita", "Exato", "Aproximado",
+                "Erro absoluto", "Erro relativo");
+            System.out.println(cabecalho);
+            System.out.println("-".repeat(cabecalho.length()));
+    }
+    
+    private static void imprimirLinha(String rotulo, ResultadoOperacao r) {
+    System.out.println(String.format(FORMATO_LINHA,
+            rotulo,
+            r.resultado(),
+            Formatador.formatar(r.exato()),
+            Formatador.formatar(r.aproximado()),
+            Formatador.formatar(r.erroAbsoluto()),
+            Formatador.formatar(r.erroRelativo())));
+    }
+    
+    public static void executarSomaSucessiva(){
+        String x = lerNumero("Digite o numero a ser somado: ");
+        int vezesSomadas = lerInteiro("Digite quantas vezes o numero sera somado: ", 1);
+        int digitosSignificativos = lerInteiro("Digitos significativos (n): ", 1);
+        
+        for(ModoCorte modo: ModoCorte.values()){
+            List<ResultadoOperacao> lista = Simulador.somaSucessiva(x, vezesSomadas, digitosSignificativos, modo);
+            
+            System.out.println("");
+            System.out.println(modo);
+            imprimirCabecalho("Passo"); 
+            
+            for (int i = 0; i < lista.size(); i++) {
+                imprimirLinha(String.valueOf(i + 1), lista.get(i));
+            }
+            
+            ResultadoOperacao ultimo = lista.get(lista.size() - 1);
+            System.out.println("Erro total apos " + vezesSomadas + " somas: Ea = "
+                + Formatador.formatar(ultimo.erroAbsoluto())
+                + " | Er = " + Formatador.formatar(ultimo.erroRelativo()));
+        }
+        
+        System.out.println("");
+            
+    }
+    
     public static void main(String[] args) {
         boolean continuar = true;
         
@@ -128,7 +186,7 @@ public class Cli {
                 break;
             case "2":
                 
-                System.out.println("opcao 2 ainda nao implementada");
+                executarSomaSucessiva();
                 
                 break;
             case "3":
