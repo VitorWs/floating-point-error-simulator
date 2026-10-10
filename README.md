@@ -82,5 +82,7 @@ O pacote `nucleo` não lê nem imprime nada: toda a entrada e saída fica nas in
 ## Equipe
 
 Laedson Araújo Silva Júnior
+
 Myguel Luiz Quixaba Alves
+
 Vitor Santos Pereira de Souza
