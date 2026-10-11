@@ -14,7 +14,10 @@ import java.util.Objects;
  * arredondamento simetrico. Toda operacao aritmetica e feita sobre os
  * operandos ja cortados e o resultado e cortado novamente em n digitos,
  * como faria uma maquina de precisao finita.
+ *
+ * @author VitorWs
  */
+
 public final class NumeroPontoFlutuante {
 
     /** Precisao interna usada so para dividir (bem maior que qualquer n razoavel). */
@@ -25,7 +28,7 @@ public final class NumeroPontoFlutuante {
     private final int expoente;       // e
     private final int n;              // digitos significativos
     private final ModoCorte modo;
-    private final BigDecimal valor;   // valor representado (ja cortado)
+    private final BigDecimal valor;   // valor representado (ja cortado)  // utilizamos BigDecimal para evitar problemas de arredondamento do double
 
     private NumeroPontoFlutuante(int sinal, int[] mantissa, int expoente, int n,
                                  ModoCorte modo, BigDecimal valor) {
@@ -63,14 +66,14 @@ public final class NumeroPontoFlutuante {
             return new NumeroPontoFlutuante(0, new int[n], 0, n, modo, BigDecimal.ZERO);
         }
 
-        int sinal = v.signum();
-        BigDecimal abs = v.abs().stripTrailingZeros();
-        String digitos = abs.unscaledValue().toString();
+        int sinal = v.signum(); 
+        BigDecimal abs = v.abs().stripTrailingZeros(); // remove o sinal e zeros a direita para normalizar
+        String digitos = abs.unscaledValue().toString(); //  extrai os digitos d1d2...dn (sem ponto decimal)
 
-        // 0,d1d2... x 10^e  ->  e = (qtd. de digitos) - escala
+        // 0,d1d2... x 10^e  ->  e = (qtd. de digitos) - escala 
         int e = digitos.length() - abs.scale();
 
-        // Corte: copia os n primeiros digitos (completa com zeros se faltar)
+        // Corte: copia os n primeiros digitos (completa com zeros se faltar) // ja eh o truncamento
         int[] d = new int[n];
         for (int i = 0; i < n && i < digitos.length(); i++) {
             d[i] = digitos.charAt(i) - '0';
@@ -90,15 +93,15 @@ public final class NumeroPontoFlutuante {
                 e++;
             }
         }
-
-        StringBuilder sb = new StringBuilder();
+        // agora vai remontar o valor 
+        StringBuilder sb = new StringBuilder(); // constrói o valor cortado em BigDecimal
         for (int x : d) {
             sb.append(x);
         }
         BigDecimal valorCortado = new BigDecimal(new BigInteger(sb.toString()))
-                .scaleByPowerOfTen(e - n);
+                .scaleByPowerOfTen(e - n);          // faz 0,d1d2...dn x 10^e
         if (sinal < 0) {
-            valorCortado = valorCortado.negate();
+            valorCortado = valorCortado.negate();   // restaura o sinal
         }
         return new NumeroPontoFlutuante(sinal, d, e, n, modo, valorCortado);
     }

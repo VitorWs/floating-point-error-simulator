@@ -1,6 +1,11 @@
 package nucleo;
 
-/** Calculo dos erros absoluto e relativo. */
+/**
+ * Classe utilitaria para calculo de erros absolutos e relativos.
+ *
+ * @author VitorWs
+ */
+
 public final class Erros {
 
     private Erros() {

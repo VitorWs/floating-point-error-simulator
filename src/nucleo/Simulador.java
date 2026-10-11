@@ -3,7 +3,12 @@ package nucleo;
 import java.util.ArrayList;
 import java.util.List;
 
-/** Fachada do nucleo: eh por aqui que a CLI deve chamar o backend. */
+/**
+ * Fachada do nucleo: eh por aqui que a CLI deve chamar o backend.
+ *
+ * @author VitorWs
+ */
+
 public final class Simulador {
 
     private Simulador() {

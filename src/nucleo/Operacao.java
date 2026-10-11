@@ -1,6 +1,11 @@
 package nucleo;
 
-/** Operacoes aritmeticas basicas suportadas pelo simulador. */
+/**
+ * Operacoes aritmeticas basicas suportadas pelo simulador.
+ *
+ * @author VitorWs
+ */
+
 public enum Operacao {
     SOMA('+'),
     SUBTRACAO('-'),

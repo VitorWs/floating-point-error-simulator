@@ -1,6 +1,11 @@
 package nucleo;
 
-/** Estrategia usada para cortar a mantissa em n digitos significativos. */
+/**
+ * Enum para representar os modos de corte da mantissa: truncamento ou arredondamento simétrico.
+ *
+ * @author VitorWs
+ */
+
 public enum ModoCorte {
     TRUNCAMENTO("Truncamento"),
     ARREDONDAMENTO("Arredondamento simétrico");

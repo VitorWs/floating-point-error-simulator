@@ -9,7 +9,9 @@ package nucleo;
  * @param exato      valor de referencia calculado em double com as entradas originais
  * @param aproximado resultado em precisao finita convertido para double
  * @param erroAbsoluto Ea = |exato - aproximado|
- * @param erroRelativo Er = Ea / |exato| (NaN se exato = 0)
+ * @param erroRelativo Er = Ea / |aproximado| (NaN se aproximado = 0)
+ *
+ * @author VitorWs
  */
 public record ResultadoOperacao(
         Operacao operacao,
