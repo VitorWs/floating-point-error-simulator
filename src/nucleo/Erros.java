@@ -1,29 +1,35 @@
 package nucleo;
 
+import java.math.BigDecimal;
+import java.math.MathContext;
+
 /**
- * Classe utilitaria para calculo de erros absolutos e relativos.
+ * Calculo dos erros absoluto e relativo (em BigDecimal, sem ruido de double).
  *
  * @author VitorWs
  */
 
 public final class Erros {
-
+ 
+    /** Precisao da divisao do erro relativo (34 digitos significativos). */
+    private static final MathContext PRECISAO = MathContext.DECIMAL128;
+ 
     private Erros() {
     }
-
+ 
     /** Ea = | Exato - Aproximado | */
-    public static double absoluto(double exato, double aproximado) {
-        return Math.abs(exato - aproximado);
+    public static BigDecimal absoluto(BigDecimal exato, BigDecimal aproximado) {
+        return exato.subtract(aproximado).abs();
     }
-
+ 
     /**
      * Er = Ea / | Aproximado |.
-     * Retorna NaN quando o valor aproximado e zero (erro relativo indefinido).
+     * Retorna null quando o valor aproximado e zero (erro relativo indefinido).
      */
-    public static double relativo(double exato, double aproximado) {
-        if (aproximado == 0.0) {
-            return Double.NaN;
+    public static BigDecimal relativo(BigDecimal exato, BigDecimal aproximado) {
+        if (aproximado.signum() == 0) {
+            return null;
         }
-        return absoluto(exato, aproximado) / Math.abs(aproximado);
+        return absoluto(exato, aproximado).divide(aproximado.abs(), PRECISAO);
     }
 }
