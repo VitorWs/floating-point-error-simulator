@@ -3,7 +3,7 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
 package gui;
- 
+
 import apresentacao.Formatador;
 import java.awt.BorderLayout;
 import java.awt.Component;
@@ -30,48 +30,81 @@ import nucleo.ModoCorte;
 import nucleo.Operacao;
 import nucleo.ResultadoOperacao;
 import nucleo.Simulador;
- 
+
 /**
- * Aba "Operação única": calcula x (op) y com truncamento e arredondamento
- * e mostra os dois resultados lado a lado numa tabela.
+ * Painel visual correspondente à primeira aba da janela gráfica: "Operação única".
+ *
+ * Para que serve esta tela?
+ * Permite ao usuário digitar dois números quaisquer ({@code x} e {@code y}), escolher uma das
+ * quatro operações básicas (+, -, *, /) e definir o limite de dígitos significativos ({@code n}).
+ * Ao clicar em "Calcular" (ou apertar Enter), a tela consulta o pacote {@code nucleo} e exibe:
+ * 1) No centro: uma tabela comparando lado a lado o resultado por Truncamento e por Arredondamento,
+ *    junto com o valor Exato, o valor Aproximado, o Erro Absoluto (Ea) e o Erro Relativo (Er);
+ * 2) Na parte inferior: uma caixa mostrando como os operandos {@code x} e {@code y} ficaram
+ *    armazenados na máquina após o corte de {@code n} dígitos (muito útil para explicar fenômenos
+ *    como o Cancelamento Subtrativo do Exemplo 2).
  *
  * @author laeds
  */
 public class PainelOperacao extends JPanel {
- 
-    /* Títulos das colunas da tabela. */
+
+    /** Títulos das 6 colunas que aparecem no topo da tabela de resultados. */
     private static final String[] COLUNAS = {
         "Modo", "Precisão finita", "Exato", "Aproximado", "Erro absoluto", "Erro relativo"
     };
- 
+
+    /** Campo de texto onde o usuário digita o primeiro número (x). */
     private final JTextField campoX = new JTextField(10);
+
+    /** Campo de texto onde o usuário digita o segundo número (y). */
     private final JTextField campoY = new JTextField(10);
+
+    /** Caixa de seleção (dropdown) para escolher a operação matemática (+, -, *, /). */
     private final JComboBox<Operacao> caixaOperacao = new JComboBox<>(Operacao.values());
+
+    /**
+     * Seletor numérico com setinhas (spinner) para escolher o número de dígitos significativos 'n'.
+     * Começa em 4 (valor padrão pedido nos testes do trabalho), aceitando valores de 1 até 50.
+     */
     private final JSpinner campoN = new JSpinner(new SpinnerNumberModel(4, 1, 50, 1));
- 
-    /* Dados da tabela, com as células não editáveis. */
+
+    /**
+     * Modelo de dados que guarda as linhas da tabela.
+     * Sobrescrevemos {@code isCellEditable} retornando {@code false} para impedir que o usuário
+     * apague ou altere manualmente os resultados dando duplo-clique nas células da tabela.
+     */
     private final DefaultTableModel modeloTabela = new DefaultTableModel(COLUNAS, 0) {
         @Override
         public boolean isCellEditable(int linha, int coluna) {
             return false;
         }
     };
- 
+
+    /** Área de texto no rodapé da aba que exibe como x e y ficaram guardados após o corte. */
     private final JTextArea areaOperandos = new JTextArea(3, 40);
- 
-    /* Monta a aba: formulário em cima, tabela no meio e operandos embaixo. */
+
+    /**
+     * Construtor do painel: divide a tela em três regiões usando {@link BorderLayout}:
+     * - Norte (topo): barra com os campos de entrada e botões;
+     * - Centro (meio): tabela comparativa de resultados e erros;
+     * - Sul (embaixo): quadro mostrando os operandos armazenados após o corte.
+     */
     public PainelOperacao() {
         setLayout(new BorderLayout(10, 10));
+        // Cria uma margem interna de 10 pixels ao redor de todo o painel para não colar nas bordas da janela
         setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
- 
+
         add(montarFormulario(), BorderLayout.NORTH);
         add(montarTabela(), BorderLayout.CENTER);
         add(montarAreaOperandos(), BorderLayout.SOUTH);
     }
- 
-    /* Linha com os campos de entrada e os botões. */
+
+    /**
+     * Monta a barra superior com os rótulos, caixas de texto e botões "Calcular" e "Limpar".
+     */
     private JPanel montarFormulario() {
-        // A caixa mostra só o símbolo (+, -, *, /) em vez do nome do enum.
+        // Personaliza a caixa de seleção de operações para mostrar apenas o símbolo matemático
+        // ('+', '-', '*', '/') em vez do nome técnico do enum ("SOMA", "SUBTRACAO", etc.).
         caixaOperacao.setRenderer(new DefaultListCellRenderer() {
             @Override
             public Component getListCellRendererComponent(JList<?> lista, Object valor,
@@ -83,15 +116,19 @@ public class PainelOperacao extends JPanel {
                 return this;
             }
         });
- 
+
         JButton botaoCalcular = new JButton("Calcular");
         JButton botaoLimpar = new JButton("Limpar");
+
+        // Conecta os botões às funções que devem rodar quando eles forem clicados
         botaoCalcular.addActionListener(e -> calcular());
         botaoLimpar.addActionListener(e -> limpar());
-        // Enter nos campos de texto também calcula.
+
+        // Atalho de usabilidade: apertar a tecla "Enter" dentro dos campos X ou Y também dispara o cálculo!
         campoX.addActionListener(e -> calcular());
         campoY.addActionListener(e -> calcular());
- 
+
+        // Organiza todos os itens em uma linha da esquerda para a direita (FlowLayout.LEFT)
         JPanel formulario = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 5));
         formulario.add(new JLabel("x:"));
         formulario.add(campoX);
@@ -105,14 +142,18 @@ public class PainelOperacao extends JPanel {
         formulario.add(botaoLimpar);
         return formulario;
     }
- 
-    /* Tabela de resultados, dentro de um painel com rolagem. */
+
+    /**
+     * Cria e configura a tabela visual onde os resultados são exibidos, envolvida em um
+     * painel com barra de rolagem ({@link JScrollPane}).
+     */
     private JScrollPane montarTabela() {
         JTable tabela = new JTable(modeloTabela);
-        tabela.setRowHeight(26);
-        tabela.getTableHeader().setReorderingAllowed(false);
- 
-        // Números alinhados à direita (colunas 2 a 5).
+        tabela.setRowHeight(26); // Deixa as linhas mais altas para facilitar a leitura
+        tabela.getTableHeader().setReorderingAllowed(false); // Fixa a ordem das colunas
+
+        // Alinha as colunas puramente numéricas (colunas 2 a 5: Exato, Aproximado, Ea e Er) à direita,
+        // seguindo a convenção padrão de tabelas financeiras e científicas.
         DefaultTableCellRenderer direita = new DefaultTableCellRenderer();
         direita.setHorizontalAlignment(SwingConstants.RIGHT);
         for (int coluna = 2; coluna < COLUNAS.length; coluna++) {
@@ -120,17 +161,26 @@ public class PainelOperacao extends JPanel {
         }
         return new JScrollPane(tabela);
     }
- 
-    /* Área de texto com os operandos depois do corte. */
+
+    /**
+     * Monta o quadro inferior que exibe os operandos {@code x} e {@code y} já normalizados
+     * e cortados em {@code n} dígitos significativos.
+     */
     private JScrollPane montarAreaOperandos() {
-        areaOperandos.setEditable(false);
+        areaOperandos.setEditable(false); // Apenas leitura (o usuário não digita aqui)
         JScrollPane painel = new JScrollPane(areaOperandos);
         painel.setBorder(BorderFactory.createTitledBorder("Operandos armazenados (depois do corte)"));
         return painel;
     }
- 
-    /* Lê os campos, calcula nos dois modos e preenche a tabela. */
+
+    /**
+     * Ação executada quando o usuário clica em "Calcular" ou pressiona Enter:
+     * 1. Valida os valores digitados nos campos X e Y;
+     * 2. Chama o núcleo ({@link Simulador#executar}) para Truncamento e para Arredondamento;
+     * 3. Atualiza a tabela central e o quadro de operandos armazenados na parte inferior.
+     */
     private void calcular() {
+        // 1) Lê e valida os campos X e Y. Se algum estiver inválido, lerNumero já mostra o aviso e retorna null.
         String x = lerNumero(campoX, "x");
         if (x == null) {
             return;
@@ -141,8 +191,9 @@ public class PainelOperacao extends JPanel {
         }
         Operacao op = (Operacao) caixaOperacao.getSelectedItem();
         int n = (Integer) campoN.getValue();
- 
-        // Calcula tudo antes de mexer na tabela, para um erro não deixá-la pela metade.
+
+        // 2) Calcula os dois modos antes de limpar a tabela na tela. Assim, se ocorrer um erro
+        // (como divisão por zero), a tabela não fica vazia ou preenchida pela metade.
         ModoCorte[] modos = ModoCorte.values();
         ResultadoOperacao[] resultados = new ResultadoOperacao[modos.length];
         try {
@@ -150,12 +201,13 @@ public class PainelOperacao extends JPanel {
                 resultados[i] = Simulador.executar(x, y, op, n, modos[i]);
             }
         } catch (ArithmeticException e) {
-            // Por exemplo, divisão por zero.
+            // Mostra uma janela de alerta amigável caso o usuário tente dividir por zero.
             JOptionPane.showMessageDialog(this, e.getMessage(),
                     "Erro no cálculo", JOptionPane.ERROR_MESSAGE);
             return;
         }
- 
+
+        // 3) Limpa os resultados anteriores da tabela e insere as novas linhas calculadas
         modeloTabela.setRowCount(0);
         StringBuilder operandos = new StringBuilder();
         for (int i = 0; i < modos.length; i++) {
@@ -173,15 +225,21 @@ public class PainelOperacao extends JPanel {
         }
         areaOperandos.setText(operandos.toString());
     }
- 
+
     /**
-     * Valida o texto de um campo como número (vírgula ou ponto).
-     * Se for inválido, avisa o usuário e devolve {@code null}.
+     * Verifica se o texto digitado em um campo ({@code x} ou {@code y}) é um número válido
+     * (aceitando tanto vírgula quanto ponto decimal).
+     * Se o usuário tiver digitado letras ou deixado em branco, abre uma caixa de aviso,
+     * coloca o cursor de volta no campo com problema e retorna {@code null}.
+     *
+     * @param campo Componente visual de texto a ser lido.
+     * @param nome  Nome do campo ("x" ou "y") para indicar na mensagem de erro.
+     * @return O texto numérico validado, ou {@code null} se for inválido.
      */
     private String lerNumero(JTextField campo, String nome) {
         String texto = campo.getText().trim();
         try {
-            // Criado só para validar o texto.
+            // Instancia um BigDecimal apenas para testar se o texto representa um número válido.
             new BigDecimal(texto.replace(',', '.'));
             return texto;
         } catch (NumberFormatException e) {
@@ -193,8 +251,11 @@ public class PainelOperacao extends JPanel {
             return null;
         }
     }
- 
-    /** Volta a aba ao estado inicial. */
+
+    /**
+     * Limpa todos os campos de entrada e apaga a tabela de resultados, deixando a aba
+     * pronta para um novo experimento (atendendo ao requisito de novos cálculos sem reiniciar).
+     */
     private void limpar() {
         campoX.setText("");
         campoY.setText("");
